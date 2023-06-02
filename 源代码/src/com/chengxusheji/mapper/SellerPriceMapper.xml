@@ -1,0 +1,50 @@
+﻿<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间，为了对sql语句进行隔离，方便管理，mapper开发dao方式，使用namespace有特殊作用  
+mapper代理开发时将namespace指定为mapper接口的全限定名  
+ -->
+<mapper namespace="com.chengxusheji.mapper.SellerPriceMapper"> 
+<!--在mapper.xml文件中配置很多的sql语句，执行每个sql语句时，封装为MappedStatement对象 
+mapper.xml以statement为单位管理sql语句  
+ -->
+	<!-- 添加商家价格记录 -->
+	<insert id="addSellerPrice" parameterType="sellerPrice">
+		insert into t_sellerPrice(productObj,price,sellerObj,priceDate,buyAddress,priceMemo) values 
+		(#{productObj.productId},#{price},#{sellerObj.sellerId},#{priceDate},#{buyAddress},#{priceMemo})
+	</insert>
+
+	<!-- 按照查询条件分页查询商家价格记录 -->
+	<select id="querySellerPrice" resultMap="sellerPriceMap" >
+		select t_sellerPrice.* from t_sellerPrice,t_product,t_seller ${where} and t_sellerPrice.productObj = t_product.productId and t_sellerPrice.sellerObj = t_seller.sellerId order by t_sellerPrice.priceDate DESC limit #{startIndex},#{pageSize}
+	</select>
+	<resultMap id="sellerPriceMap" type="sellerPrice">
+        <id property="priceId" column="priceId" />
+        <association property="productObj" column="productObj" select="com.chengxusheji.mapper.ProductMapper.getProduct" />
+        <association property="sellerObj" column="sellerObj" select="com.chengxusheji.mapper.SellerMapper.getSeller" />
+    </resultMap>
+
+    <!-- 按照查询条件查询所有商家价格记录 -->
+	<select id="querySellerPriceList" resultMap="sellerPriceMap" >
+		select t_sellerPrice.* from t_sellerPrice,t_product,t_seller ${where} and t_sellerPrice.productObj = t_product.productId and t_sellerPrice.sellerObj = t_seller.sellerId
+	</select>
+
+    <!-- 按照查询条件的商家价格记录数 -->
+	<select id="querySellerPriceCount" resultType="int">
+		select count(*) from t_sellerPrice,t_product,t_seller ${where} and t_sellerPrice.productObj = t_product.productId and t_sellerPrice.sellerObj = t_seller.sellerId
+	</select>
+
+	<!-- 根据主键查询某个商家价格记录 -->
+	<select id="getSellerPrice" parameterType="int" resultMap="sellerPriceMap">
+		select * from t_sellerPrice where t_sellerPrice.priceId = #{priceId}
+	</select>
+
+	<!-- 更新商家价格记录 -->
+	<update id="updateSellerPrice" parameterType="sellerPrice">
+		update t_sellerPrice set productObj=#{productObj.productId},price=#{price},sellerObj=#{sellerObj.sellerId},priceDate=#{priceDate},buyAddress=#{buyAddress},priceMemo=#{priceMemo} where priceId = #{priceId}
+	</update>
+
+	<!-- 删除商家价格记录 -->
+	<delete id="deleteSellerPrice" parameterType="int">
+		delete from t_sellerPrice where priceId=#{priceId}
+	</delete>
+
+</mapper>

@@ -1,0 +1,50 @@
+﻿<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间，为了对sql语句进行隔离，方便管理，mapper开发dao方式，使用namespace有特殊作用  
+mapper代理开发时将namespace指定为mapper接口的全限定名  
+ -->
+<mapper namespace="com.chengxusheji.mapper.ProductCommentMapper"> 
+<!--在mapper.xml文件中配置很多的sql语句，执行每个sql语句时，封装为MappedStatement对象 
+mapper.xml以statement为单位管理sql语句  
+ -->
+	<!-- 添加商品评论记录 -->
+	<insert id="addProductComment" parameterType="productComment">
+		insert into t_productComment(productObj,content,userObj,commentTime) values 
+		(#{productObj.productId},#{content},#{userObj.user_name},#{commentTime})
+	</insert>
+
+	<!-- 按照查询条件分页查询商品评论记录 -->
+	<select id="queryProductComment" resultMap="productCommentMap" >
+		select t_productComment.* from t_productComment,t_product,t_userInfo ${where} and t_productComment.productObj = t_product.productId and t_productComment.userObj = t_userInfo.user_name limit #{startIndex},#{pageSize}
+	</select>
+	<resultMap id="productCommentMap" type="productComment">
+        <id property="commentId" column="commentId" />
+        <association property="productObj" column="productObj" select="com.chengxusheji.mapper.ProductMapper.getProduct" />
+        <association property="userObj" column="userObj" select="com.chengxusheji.mapper.UserInfoMapper.getUserInfo" />
+    </resultMap>
+
+    <!-- 按照查询条件查询所有商品评论记录 -->
+	<select id="queryProductCommentList" resultMap="productCommentMap" >
+		select t_productComment.* from t_productComment,t_product,t_userInfo ${where} and t_productComment.productObj = t_product.productId and t_productComment.userObj = t_userInfo.user_name
+	</select>
+
+    <!-- 按照查询条件的商品评论记录数 -->
+	<select id="queryProductCommentCount" resultType="int">
+		select count(*) from t_productComment,t_product,t_userInfo ${where} and t_productComment.productObj = t_product.productId and t_productComment.userObj = t_userInfo.user_name
+	</select>
+
+	<!-- 根据主键查询某个商品评论记录 -->
+	<select id="getProductComment" parameterType="int" resultMap="productCommentMap">
+		select * from t_productComment where t_productComment.commentId = #{commentId}
+	</select>
+
+	<!-- 更新商品评论记录 -->
+	<update id="updateProductComment" parameterType="productComment">
+		update t_productComment set productObj=#{productObj.productId},content=#{content},userObj=#{userObj.user_name},commentTime=#{commentTime} where commentId = #{commentId}
+	</update>
+
+	<!-- 删除商品评论记录 -->
+	<delete id="deleteProductComment" parameterType="int">
+		delete from t_productComment where commentId=#{commentId}
+	</delete>
+
+</mapper>
